@@ -10,6 +10,7 @@ import {
   SquarePenIcon,
   TerminalIcon,
   TriangleAlertIcon,
+  UsersIcon,
 } from "lucide-react";
 import {
   ChangeRequestStatusIcon,
@@ -2551,6 +2552,12 @@ const SidebarChromeHeader = memo(function SidebarChromeHeader({
 const SidebarChromeFooter = memo(function SidebarChromeFooter() {
   const navigate = useNavigate();
   const { isMobile, setOpenMobile } = useSidebar();
+  const handleStudentsClick = useCallback(() => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+    void navigate({ to: "/students" });
+  }, [isMobile, navigate, setOpenMobile]);
   const handleSettingsClick = useCallback(() => {
     if (isMobile) {
       setOpenMobile(false);
@@ -2563,6 +2570,16 @@ const SidebarChromeFooter = memo(function SidebarChromeFooter() {
       <SidebarProviderUpdatePill />
       <SidebarUpdatePill />
       <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            size="sm"
+            className="gap-2 px-2 py-1.5 text-muted-foreground/70 hover:bg-accent hover:text-foreground"
+            onClick={handleStudentsClick}
+          >
+            <UsersIcon className="size-3.5" />
+            <span className="text-xs">Students</span>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
         <SidebarMenuItem>
           <SidebarMenuButton
             size="sm"
