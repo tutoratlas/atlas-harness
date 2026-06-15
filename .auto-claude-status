@@ -1,0 +1,25 @@
+{
+  "active": true,
+  "spec": "001-implement-student-workspace-plan",
+  "state": "building",
+  "subtasks": {
+    "completed": 2,
+    "total": 18,
+    "in_progress": 1,
+    "failed": 0
+  },
+  "phase": {
+    "current": "Desktop Persistence \u2014 DesktopStudents Service",
+    "id": null,
+    "total": 2
+  },
+  "workers": {
+    "active": 0,
+    "max": 1
+  },
+  "session": {
+    "number": 3,
+    "started_at": "2026-06-16T01:02:21.277829"
+  },
+  "last_update": "2026-06-16T01:06:41.548024"
+}
