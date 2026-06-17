@@ -164,6 +164,26 @@ function createBrowserLocalApi(rpcClient?: WsRpcClient): LocalApi {
           ? rpcClient.server.signalProcess(input)
           : Promise.reject(unavailableLocalBackendError()),
     },
+    materials: {
+      renderMarkdownToPdf: async (input) => {
+        if (!window.desktopBridge) {
+          throw new Error("PDF rendering is only available in desktop mode");
+        }
+        return window.desktopBridge.renderMarkdownToPdf(input);
+      },
+      openPath: async (input) => {
+        if (!window.desktopBridge) {
+          throw new Error("Opening paths is only available in desktop mode");
+        }
+        return window.desktopBridge.openPath(input);
+      },
+      ensureStudentWorkspace: async (input) => {
+        if (!window.desktopBridge) {
+          throw new Error("Student workspace creation is only available in desktop mode");
+        }
+        return window.desktopBridge.ensureStudentWorkspace(input);
+      },
+    },
   };
 }
 

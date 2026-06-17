@@ -1120,6 +1120,11 @@ export interface LocalApi {
     ) => Promise<ServerProcessResourceHistoryResult>;
     signalProcess: (input: ServerSignalProcessInput) => Promise<ServerSignalProcessResult>;
   };
+  materials: {
+    renderMarkdownToPdf: (input: RenderMarkdownToPdfInput) => Promise<RenderMarkdownToPdfResult>;
+    openPath: (input: OpenPathInput) => Promise<OpenPathResult>;
+    ensureStudentWorkspace: (input: EnsureStudentWorkspaceInput) => Promise<EnsureStudentWorkspaceResult>;
+  };
 }
 
 /**

@@ -32,3 +32,6 @@ node_modules/
 *.log
 .env*
 !.env.example
+
+# Auto Claude data directory
+.auto-claude/
