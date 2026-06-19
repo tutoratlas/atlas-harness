@@ -52,6 +52,10 @@ contextBridge.exposeInMainWorld("desktopBridge", {
     ipcRenderer.invoke(IpcChannels.SET_SAVED_ENVIRONMENT_SECRET_CHANNEL, { environmentId, secret }),
   removeSavedEnvironmentSecret: (environmentId) =>
     ipcRenderer.invoke(IpcChannels.REMOVE_SAVED_ENVIRONMENT_SECRET_CHANNEL, environmentId),
+  getStudents: () =>
+    ipcRenderer.invoke(IpcChannels.GET_STUDENTS_CHANNEL),
+  setStudents: (students) =>
+    ipcRenderer.invoke(IpcChannels.SET_STUDENTS_CHANNEL, students),
   discoverSshHosts: () => ipcRenderer.invoke(IpcChannels.DISCOVER_SSH_HOSTS_CHANNEL),
   ensureSshEnvironment: async (target, options) =>
     unwrapEnsureSshEnvironmentResult(

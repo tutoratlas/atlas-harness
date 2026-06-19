@@ -1,9 +1,11 @@
 import {
   ClientSettingsSchema,
   EnvironmentId,
+  Student,
   type ClientSettings,
   type EnvironmentId as EnvironmentIdValue,
   type PersistedSavedEnvironmentRecord,
+  type Student as StudentValue,
 } from "@t3tools/contracts";
 import * as Schema from "effect/Schema";
 
@@ -11,6 +13,7 @@ import { getLocalStorageItem, setLocalStorageItem } from "./hooks/useLocalStorag
 
 export const CLIENT_SETTINGS_STORAGE_KEY = "t3code:client-settings:v1";
 export const SAVED_ENVIRONMENT_REGISTRY_STORAGE_KEY = "t3code:saved-environment-registry:v1";
+export const STUDENT_REGISTRY_STORAGE_KEY = "t3code:student-registry:v1";
 
 const BrowserSavedEnvironmentRecordSchema = Schema.Struct({
   environmentId: EnvironmentId,
@@ -214,4 +217,39 @@ export function removeBrowserSavedEnvironmentSecret(environmentId: EnvironmentId
       return toPersistedSavedEnvironmentRecord(record);
     }),
   });
+}
+
+// Lenient schema that tolerates missing/extra fields
+const BrowserStudentRegistryDocumentSchema = Schema.Struct({
+  version: Schema.optionalKey(Schema.Number),
+  students: Schema.optionalKey(Schema.Array(Student)),
+});
+type BrowserStudentRegistryDocument = typeof BrowserStudentRegistryDocumentSchema.Type;
+
+export function readBrowserStudents(): ReadonlyArray<StudentValue> {
+  if (!hasWindow()) {
+    return [];
+  }
+
+  try {
+    const document = getLocalStorageItem(
+      STUDENT_REGISTRY_STORAGE_KEY,
+      BrowserStudentRegistryDocumentSchema,
+    );
+    return document?.students ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export function writeBrowserStudents(students: ReadonlyArray<StudentValue>): void {
+  if (!hasWindow()) {
+    return;
+  }
+
+  setLocalStorageItem(
+    STUDENT_REGISTRY_STORAGE_KEY,
+    { version: 1, students },
+    BrowserStudentRegistryDocumentSchema,
+  );
 }

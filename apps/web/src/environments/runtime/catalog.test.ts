@@ -31,6 +31,8 @@ describe("environment runtime catalog stores", () => {
           getSavedEnvironmentSecret: async () => null,
           setSavedEnvironmentSecret: async () => true,
           removeSavedEnvironmentSecret: async () => undefined,
+          getStudents: async () => [],
+          setStudents: async () => undefined,
         },
       } satisfies Pick<LocalApi, "persistence">,
     });
@@ -95,6 +97,8 @@ describe("environment runtime catalog stores", () => {
             return true;
           },
           removeSavedEnvironmentSecret: async () => undefined,
+          getStudents: async () => [],
+          setStudents: async () => undefined,
         },
       } satisfies Pick<LocalApi, "persistence">,
     });
@@ -159,6 +163,8 @@ describe("environment runtime catalog stores", () => {
           getSavedEnvironmentSecret: async () => null,
           setSavedEnvironmentSecret: async () => true,
           removeSavedEnvironmentSecret: async () => undefined,
+          getStudents: async () => [],
+          setStudents: async () => undefined,
         },
       } satisfies Pick<LocalApi, "persistence">,
     });

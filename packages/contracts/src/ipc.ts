@@ -110,6 +110,7 @@ import type {
   SourceControlRepositoryInfo,
   SourceControlRepositoryLookupInput,
 } from "./sourceControl.ts";
+import type { Student } from "./students.ts";
 
 export interface ContextMenuItem<T extends string = string> {
   id: T;
@@ -906,6 +907,8 @@ export interface DesktopBridge {
   getSavedEnvironmentSecret: (environmentId: EnvironmentId) => Promise<string | null>;
   setSavedEnvironmentSecret: (environmentId: EnvironmentId, secret: string) => Promise<boolean>;
   removeSavedEnvironmentSecret: (environmentId: EnvironmentId) => Promise<void>;
+  getStudents: () => Promise<readonly Student[]>;
+  setStudents: (students: readonly Student[]) => Promise<void>;
   discoverSshHosts: () => Promise<readonly DesktopDiscoveredSshHost[]>;
   ensureSshEnvironment: (
     target: DesktopSshEnvironmentTarget,
@@ -1056,6 +1059,8 @@ export interface LocalApi {
     getSavedEnvironmentSecret: (environmentId: EnvironmentId) => Promise<string | null>;
     setSavedEnvironmentSecret: (environmentId: EnvironmentId, secret: string) => Promise<boolean>;
     removeSavedEnvironmentSecret: (environmentId: EnvironmentId) => Promise<void>;
+    getStudents: () => Promise<readonly Student[]>;
+    setStudents: (students: readonly Student[]) => Promise<void>;
   };
   server: {
     getConfig: () => Promise<ServerConfig>;

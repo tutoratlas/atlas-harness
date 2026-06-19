@@ -39,6 +39,7 @@ import * as DesktopObservability from "./app/DesktopObservability.ts";
 import * as DesktopServerExposure from "./backend/DesktopServerExposure.ts";
 import * as DesktopClientSettings from "./settings/DesktopClientSettings.ts";
 import * as DesktopSavedEnvironments from "./settings/DesktopSavedEnvironments.ts";
+import * as DesktopStudents from "./settings/DesktopStudents.ts";
 import * as DesktopAppSettings from "./settings/DesktopAppSettings.ts";
 import * as DesktopShellEnvironment from "./shell/DesktopShellEnvironment.ts";
 import * as DesktopSshEnvironment from "./ssh/DesktopSshEnvironment.ts";
@@ -118,6 +119,7 @@ const desktopFoundationLayer = Layer.mergeAll(
   DesktopAppSettings.layer,
   DesktopClientSettings.layer,
   DesktopSavedEnvironments.layer,
+  DesktopStudents.layer,
   DesktopCloudAuthTokenStore.layer,
   DesktopAssets.layer,
   DesktopObservability.layer,
