@@ -1,9 +1,18 @@
 "use client";
 
-import { ExternalLinkIcon, MapPinIcon, MessageCircleIcon, PhoneIcon } from "lucide-react";
+import { useState } from "react";
+import {
+  ExternalLinkIcon,
+  FolderIcon,
+  MapPinIcon,
+  MessageCircleIcon,
+  PhoneIcon,
+} from "lucide-react";
 import type { Student } from "@t3tools/contracts";
 import { Button } from "../ui/button";
+import { toastManager } from "../ui/toast";
 import { readLocalApi } from "~/localApi";
+import { useHandleNewThread } from "../../hooks/useHandleNewThread";
 import { whatsAppLink, telegramLink, googleMapsLink } from "./links";
 
 export interface StudentDetailProps {
@@ -13,6 +22,9 @@ export interface StudentDetailProps {
 }
 
 export function StudentDetail({ student, onEdit, onDelete }: StudentDetailProps) {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const { handleNewThread, defaultProjectRef } = useHandleNewThread();
+
   const handleDelete = async () => {
     const localApi = readLocalApi();
     if (!localApi) return;
@@ -33,6 +45,67 @@ export function StudentDetail({ student, onEdit, onDelete }: StudentDetailProps)
     }
   };
 
+  // Plan 23: ensure the student's on-disk materials workspace exists, then open
+  // a session rooted at that folder so the agent reads its AGENTS.md harness.
+  const handleGenerateMaterials = async () => {
+    if (!window.desktopBridge) {
+      toastManager.add({
+        title: "Desktop app required",
+        description: "Materials workspace is only available in the desktop app.",
+        type: "error",
+      });
+      return;
+    }
+
+    if (!defaultProjectRef) {
+      toastManager.add({
+        title: "No project available",
+        description: "No environment or project is configured. Please set up a project first.",
+        type: "error",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+
+    try {
+      const result = await window.desktopBridge.ensureStudentWorkspace({
+        studentId: student.id,
+      });
+
+      if (!result.success || !result.workspacePath) {
+        throw new Error(result.error || "Failed to create workspace");
+      }
+
+      toastManager.add({
+        title: "Workspace created",
+        description: `Materials workspace ready at ${result.workspacePath}`,
+        type: "success",
+        data: { dismissAfterVisibleMs: 3000 },
+      });
+
+      await handleNewThread(defaultProjectRef, {
+        worktreePath: result.workspacePath,
+      });
+
+      toastManager.add({
+        title: "Session started",
+        description: `Ready to generate materials for ${student.name}`,
+        type: "success",
+        data: { dismissAfterVisibleMs: 3000 },
+      });
+    } catch (error) {
+      console.error("Failed to generate materials:", error);
+      toastManager.add({
+        title: "Failed to generate materials",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        type: "error",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const studentWhatsAppUrl = whatsAppLink(student.phone);
   const studentTelegramUrl = telegramLink(student.phone);
   const addressMapsUrl = googleMapsLink(student.address);
@@ -43,6 +116,15 @@ export function StudentDetail({ student, onEdit, onDelete }: StudentDetailProps)
       <div className="flex items-center justify-between border-b border-border/60 px-6 py-4">
         <h2 className="text-lg font-semibold text-foreground">{student.name}</h2>
         <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="default"
+            onClick={handleGenerateMaterials}
+            disabled={isGenerating}
+          >
+            <FolderIcon className="size-4" />
+            {isGenerating ? "Creating workspace…" : "Generate materials"}
+          </Button>
           <Button size="sm" variant="outline" onClick={onEdit}>
             Edit
           </Button>

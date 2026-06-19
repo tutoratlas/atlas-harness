@@ -286,6 +286,9 @@ function makeDesktopBridge(overrides: Partial<DesktopBridge> = {}): DesktopBridg
       throw new Error("installUpdate not implemented in test");
     },
     onUpdateState: () => () => undefined,
+    renderMarkdownToPdf: async () => ({ success: true, filePath: "/mock/path.pdf" }),
+    openPath: async () => ({ success: true }),
+    ensureStudentWorkspace: async () => ({ success: true, workspacePath: "/mock/workspace" }),
     ...overrides,
   };
 }

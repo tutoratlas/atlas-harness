@@ -49,6 +49,9 @@ export const Student = Schema.Struct({
   school: Schema.optionalKey(TrimmedNonEmptyString),
   address: Schema.optionalKey(SingaporeAddress),
   notes: Schema.optionalKey(Schema.String),
+  // Plan 23: relative path to the student's on-disk materials folder,
+  // e.g. "students/trevor-jc1-gp". Computed once when the folder is created.
+  workspaceFolder: Schema.optionalKey(TrimmedNonEmptyString),
   createdAt: IsoDateTime,
   updatedAt: IsoDateTime,
 });
@@ -59,3 +62,17 @@ export const StudentRegistryDocument = Schema.Struct({
   students: Schema.Array(Student),
 });
 export type StudentRegistryDocument = typeof StudentRegistryDocument.Type;
+
+/**
+ * Derives a URL-safe slug from a student name (lowercase, hyphenated).
+ * Plan 23 pairs this with a short id suffix to guarantee folder uniqueness.
+ */
+export function deriveStudentSlug(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
