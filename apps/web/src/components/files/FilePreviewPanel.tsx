@@ -13,6 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isBrowserPreviewFile, openFileInPreview } from "~/browser/openFileInPreview";
 import ChatMarkdown from "~/components/ChatMarkdown";
 import { OpenInPicker } from "~/components/chat/OpenInPicker";
+import { RenderPdfButton } from "~/components/pdf/RenderPdfButton";
 import { ensureEnvironmentApi } from "~/environmentApi";
 import { usePrimaryEnvironmentId } from "~/environments/primary/context";
 import { useTheme } from "~/hooks/useTheme";
@@ -623,6 +624,16 @@ export default function FilePreviewPanel({
     () => (relativePath ? fileBreadcrumbs(projectName, relativePath) : []),
     [projectName, relativePath],
   );
+  const derivedOutputPath = useMemo(() => {
+    if (!relativePath) return null;
+    const lastSlash = relativePath.lastIndexOf("/");
+    const dir = lastSlash === -1 ? "" : relativePath.substring(0, lastSlash);
+    const filename = lastSlash === -1 ? relativePath : relativePath.substring(lastSlash + 1);
+    const lastDot = filename.lastIndexOf(".");
+    const basename = lastDot === -1 ? filename : filename.substring(0, lastDot);
+    const outputDir = dir ? `${dir}/output` : "output";
+    return `${cwd}/${outputDir}/${basename}.pdf`;
+  }, [cwd, relativePath]);
   const onFilePostRender = useFileLineReveal(relativePath, revealLine, revealRequestId);
 
   useEffect(() => {
@@ -725,6 +736,14 @@ export default function FilePreviewPanel({
                 {renderMarkdown ? "Show markdown source" : "Show rendered markdown"}
               </TooltipPopup>
             </Tooltip>
+          ) : null}
+          {isMarkdown && renderMarkdown && file.data && derivedOutputPath ? (
+            <RenderPdfButton
+              markdown={file.data.contents}
+              outputPath={derivedOutputPath}
+              variant="ghost"
+              size="sm"
+            />
           ) : null}
           {canOpenInBrowser ? (
             <Tooltip>
