@@ -5,7 +5,7 @@ import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import rehypeRaw from "rehype-raw";
 import { getFontFaces } from "./fonts.ts";
-import printCss from "./print.css?raw";
+import { printCss } from "./printCss.ts";
 
 /**
  * Converts markdown string to a full HTML5 document with embedded styles and fonts.
