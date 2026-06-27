@@ -39,6 +39,10 @@
       "types": "./src/shell.ts",
       "import": "./src/shell.ts"
     },
+    "./slugify": {
+      "types": "./src/slugify.ts",
+      "import": "./src/slugify.ts"
+    },
     "./semver": {
       "types": "./src/semver.ts",
       "import": "./src/semver.ts"
