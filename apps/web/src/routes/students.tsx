@@ -67,9 +67,26 @@ function StudentsContentLayout() {
     async (student: Student) => {
       if (rightPaneView === "create") {
         // Add new student to roster
-        const updatedStudents = [...students, student];
+        let finalStudent = student;
+
+        // R4: Ensure student workspace folder exists
+        if (window.desktopBridge) {
+          try {
+            const result = await window.desktopBridge.ensureStudentWorkspace({
+              name: student.name,
+              id: student.id,
+            });
+            if (result.success && result.workspaceFolder) {
+              finalStudent = { ...student, workspaceFolder: result.workspaceFolder };
+            }
+          } catch (error) {
+            // Silent fail - continue without workspaceFolder
+          }
+        }
+
+        const updatedStudents = [...students, finalStudent];
         await persistStudents(updatedStudents);
-        setSelectedStudentId(student.id);
+        setSelectedStudentId(finalStudent.id);
         setRightPaneView("detail");
       } else if (rightPaneView === "edit") {
         // Update existing student
@@ -93,6 +110,26 @@ function StudentsContentLayout() {
   // Handler: Delete from detail view
   const handleDelete = useCallback(async () => {
     if (!selectedStudentId) return;
+
+    const student = students.find((s) => s.id === selectedStudentId);
+    if (!student) return;
+
+    // R4: Handle student workspace folder deletion
+    if (window.desktopBridge && student.workspaceFolder) {
+      const localApi = ensureLocalApi();
+      const confirmed = await localApi.dialogs.confirm(
+        `Delete student "${student.name}" and workspace folder "${student.workspaceFolder}"? This action cannot be undone.`,
+      );
+      if (!confirmed) return;
+
+      try {
+        await window.desktopBridge.deleteStudentWorkspace({
+          workspaceFolder: student.workspaceFolder,
+        });
+      } catch (error) {
+        // Silent fail - continue with roster removal
+      }
+    }
 
     const updatedStudents = students.filter((s) => s.id !== selectedStudentId);
     await persistStudents(updatedStudents);
