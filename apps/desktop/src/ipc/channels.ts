@@ -79,3 +79,4 @@ export const PREVIEW_POINTER_EVENT_CHANNEL = "desktop:preview-pointer-event";
 export const RENDER_MARKDOWN_TO_PDF_CHANNEL = "desktop:render-markdown-to-pdf";
 export const OPEN_PATH_CHANNEL = "desktop:open-path";
 export const ENSURE_STUDENT_WORKSPACE_CHANNEL = "desktop:ensure-student-workspace";
+export const DELETE_STUDENT_WORKSPACE_CHANNEL = "desktop:delete-student-workspace";
