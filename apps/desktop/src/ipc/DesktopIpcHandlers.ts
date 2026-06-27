@@ -51,7 +51,7 @@ import {
 } from "./methods/window.ts";
 import * as PreviewIpc from "./methods/preview.ts";
 import { renderMarkdownToPdf } from "./methods/pdf.ts";
-import { ensureStudentWorkspace, openPath } from "./methods/workspace.ts";
+import { deleteStudentWorkspace, ensureStudentWorkspace, openPath } from "./methods/workspace.ts";
 
 export const installDesktopIpcHandlers = Effect.fn("desktop.ipc.installHandlers")(function* () {
   const ipc = yield* DesktopIpc.DesktopIpc;
@@ -101,6 +101,7 @@ export const installDesktopIpcHandlers = Effect.fn("desktop.ipc.installHandlers"
   yield* ipc.handle(checkForUpdate);
   yield* ipc.handle(renderMarkdownToPdf);
   yield* ipc.handle(ensureStudentWorkspace);
+  yield* ipc.handle(deleteStudentWorkspace);
   yield* ipc.handle(openPath);
   for (const previewMethod of PreviewIpc.methods) {
     yield* ipc.handle(previewMethod);

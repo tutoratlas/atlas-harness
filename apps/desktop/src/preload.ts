@@ -110,6 +110,8 @@ contextBridge.exposeInMainWorld("desktopBridge", {
   openPath: (path) => ipcRenderer.invoke(IpcChannels.OPEN_PATH_CHANNEL, path),
   ensureStudentWorkspace: (input) =>
     ipcRenderer.invoke(IpcChannels.ENSURE_STUDENT_WORKSPACE_CHANNEL, input),
+  deleteStudentWorkspace: (input) =>
+    ipcRenderer.invoke(IpcChannels.DELETE_STUDENT_WORKSPACE_CHANNEL, input),
   createCloudAuthRequest: () => ipcRenderer.invoke(IpcChannels.CREATE_CLOUD_AUTH_REQUEST_CHANNEL),
   getCloudAuthToken: () => ipcRenderer.invoke(IpcChannels.GET_CLOUD_AUTH_TOKEN_CHANNEL),
   setCloudAuthToken: (token: string) =>
