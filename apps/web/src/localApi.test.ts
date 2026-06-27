@@ -288,7 +288,12 @@ function makeDesktopBridge(overrides: Partial<DesktopBridge> = {}): DesktopBridg
     onUpdateState: () => () => undefined,
     renderMarkdownToPdf: async () => ({ success: true, filePath: "/mock/path.pdf" }),
     openPath: async () => ({ success: true }),
-    ensureStudentWorkspace: async () => ({ success: true, workspacePath: "/mock/workspace" }),
+    ensureStudentWorkspace: async () => ({
+      success: true,
+      workspacePath: "/mock/workspace",
+      workspaceFolder: "students/mock-student-abc123",
+    }),
+    deleteStudentWorkspace: async () => ({ success: true }),
     ...overrides,
   };
 }

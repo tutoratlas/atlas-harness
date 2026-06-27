@@ -495,7 +495,14 @@ const createDesktopBridgeStub = (overrides?: {
     onUpdateState: () => () => {},
     renderMarkdownToPdf: vi.fn().mockResolvedValue({ success: true, filePath: "/mock/path.pdf" }),
     openPath: vi.fn().mockResolvedValue({ success: true }),
-    ensureStudentWorkspace: vi.fn().mockResolvedValue({ success: true, workspacePath: "/mock/workspace" }),
+    ensureStudentWorkspace: vi
+      .fn()
+      .mockResolvedValue({
+        success: true,
+        workspacePath: "/mock/workspace",
+        workspaceFolder: "students/mock-student-abc123",
+      }),
+    deleteStudentWorkspace: vi.fn().mockResolvedValue({ success: true }),
   };
 };
 

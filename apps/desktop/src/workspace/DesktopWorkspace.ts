@@ -81,13 +81,8 @@ const deleteStudentWorkspaceImpl = Effect.fnUntraced(function* (input: {
 
   // Security check: ensure the real path starts with the students directory
   if (!realPath.startsWith(realStudentsDir + input.path.sep) && realPath !== realStudentsDir) {
-    yield* Effect.fail(
-      PlatformError.SystemError({
-        method: "deleteStudentWorkspace",
-        pathOrDescriptor: realPath,
-        reason: "BadArgument",
-        message: `Path '${realPath}' is not strictly inside students directory '${realStudentsDir}'`,
-      }),
+    return yield* Effect.die(
+      `Security: Path '${realPath}' is not strictly inside students directory '${realStudentsDir}'`,
     );
   }
 
@@ -187,13 +182,8 @@ export const layerTest = (workspaceRoot = "/tmp/test-workspace") =>
             const realStudentsDir = yield* fileSystem.realPath(studentsDir);
 
             if (!realPath.startsWith(realStudentsDir + path.sep) && realPath !== realStudentsDir) {
-              yield* Effect.fail(
-                PlatformError.SystemError({
-                  method: "deleteStudentWorkspace",
-                  pathOrDescriptor: realPath,
-                  reason: "BadArgument",
-                  message: `Path '${realPath}' is not strictly inside students directory '${realStudentsDir}'`,
-                }),
+              return yield* Effect.die(
+                `Security: Path '${realPath}' is not strictly inside students directory '${realStudentsDir}'`,
               );
             }
 
