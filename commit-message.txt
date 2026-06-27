@@ -1,0 +1,33 @@
+auto-claude: subtask-6-1 - Complete integration verification and fix remaining branding references
+
+This commit completes the integration verification phase and fixes 40+ user-facing
+"T3 Code" references that were missed in previous phases.
+
+Verification Results:
+- ✅ Web tests: 118 test files, 1196 tests passed
+- ✅ Scripts tests: 11 test files, 76 tests passed
+- ✅ Brand-assets test: passed (filenames unchanged)
+- ✅ Generator determinism: verified (clean git diff after 2 runs)
+- ✅ appId: com.tutoratlas.app
+- ✅ productName: TutorAtlas (Alpha)
+- ✅ Grep audit: passed (only acceptable references remain)
+
+Fixed User-Facing References (23 files):
+- Error messages and dialogs (linkEnvironment, RelayClientInstallDialog)
+- Settings UI (KeybindingsSettings, SettingsPanels, ConnectionsSettings, providerStatus)
+- Update dialogs and Rosetta warnings (desktopUpdate.logic)
+- Authentication (DesktopClerkSignIn)
+- SSH prompts (SshPasswordPromptDialog)
+- Preview and browser messages (PreviewPanel, RightPanelTabs, _chat)
+- Version mismatch hints (versionSkew)
+- Release announcements (notify-discord-release, resolve-nightly-release)
+- CLI help text (dev-runner)
+- Test assertions updated to match changes
+
+Preserved (Out of Scope):
+- Legacy directory name in DesktopEnvironment.ts:166
+- Protocol name in build-desktop-artifact.ts:779
+- Internal build descriptions
+
+All user-facing "T3 Code" strings have been replaced with "TutorAtlas" except
+those explicitly marked as out of scope in the specification.
