@@ -49,6 +49,12 @@ If OTLP is not configured, metrics still exist in-process, but you will not have
 
 Provider event NDJSON files still exist for provider runtime streams. Those are separate from the main server trace file.
 
+### Known Benign Log Messages
+
+Some error messages appear in logs but can be safely ignored:
+
+- **R2 VSync errors on Linux**: `ERROR:ui/gl/gl_surface_presentation_helper.cc:260` is benign noise on Linux systems. This is a known Chromium/Electron rendering issue that does not affect functionality.
+
 ## Run The Server In Instrumented Mode
 
 There are two useful modes:
@@ -168,7 +174,7 @@ The trace file is the fastest way to inspect raw span data.
 Tail it:
 
 ```bash
-tail -f "$T3CODE_HOME/userdata/logs/server.trace.ndjson"
+tail -f "$TUTORATLAS_HOME/userdata/logs/server.trace.ndjson"
 ```
 
 In monorepo dev, use:
@@ -185,7 +191,7 @@ jq -c 'select(.exit._tag != "Success") | {
   durationMs,
   exit,
   attributes
-}' "$T3CODE_HOME/userdata/logs/server.trace.ndjson"
+}' "$TUTORATLAS_HOME/userdata/logs/server.trace.ndjson"
 ```
 
 Show slow spans:
@@ -196,7 +202,7 @@ jq -c 'select(.durationMs > 1000) | {
   durationMs,
   traceId,
   spanId
-}' "$T3CODE_HOME/userdata/logs/server.trace.ndjson"
+}' "$TUTORATLAS_HOME/userdata/logs/server.trace.ndjson"
 ```
 
 Inspect embedded log events:
@@ -213,7 +219,7 @@ jq -c 'select(any(.events[]?; .attributes["effect.logLevel"] != null)) | {
         level: .attributes["effect.logLevel"]
       }
   ]
-}' "$T3CODE_HOME/userdata/logs/server.trace.ndjson"
+}' "$TUTORATLAS_HOME/userdata/logs/server.trace.ndjson"
 ```
 
 Follow one trace:
@@ -224,7 +230,7 @@ jq -r 'select(.traceId == "TRACE_ID_HERE") | [
   .spanId,
   (.parentSpanId // "-"),
   .durationMs
-] | @tsv' "$T3CODE_HOME/userdata/logs/server.trace.ndjson"
+] | @tsv' "$TUTORATLAS_HOME/userdata/logs/server.trace.ndjson"
 ```
 
 Filter orchestration commands:
@@ -235,7 +241,7 @@ jq -c 'select(.attributes["orchestration.command_type"] != null) | {
   durationMs,
   commandType: .attributes["orchestration.command_type"],
   aggregateKind: .attributes["orchestration.aggregate_kind"]
-}' "$T3CODE_HOME/userdata/logs/server.trace.ndjson"
+}' "$TUTORATLAS_HOME/userdata/logs/server.trace.ndjson"
 ```
 
 Filter git activity:
@@ -250,7 +256,7 @@ jq -c 'select(.attributes["git.operation"] != null) | {
     .events[]
     | select(.name == "git.hook.started" or .name == "git.hook.finished")
   ]
-}' "$T3CODE_HOME/userdata/logs/server.trace.ndjson"
+}' "$TUTORATLAS_HOME/userdata/logs/server.trace.ndjson"
 ```
 
 ### Use Tempo When You Need A Real Trace Viewer

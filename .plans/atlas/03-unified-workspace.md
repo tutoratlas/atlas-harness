@@ -25,7 +25,7 @@ session at `~/tutoratlas/students/<slug>/`.
 - **The workspace** `~/tutoratlas` — visible, portable, the **agent's root** and
   the tutor's content (students, materials, skills). Overridable via a
   `TUTORATLAS_WORKSPACE` env/setting.
-- **App-data** `baseDir` (= `T3CODE_HOME`, e.g. the OS app-data dir) — hidden app
+- **App-data** `baseDir` (= `TUTORATLAS_HOME`, e.g. the OS app-data dir) — hidden app
   machinery (settings, `students.json` today, tokens, logs). **Stays where it is.**
 
 These are different directories. The whole job below is making the *workspace* one
@@ -142,7 +142,7 @@ plumbing. See "Load-bearing" below for what must stay.
 
 - `os.homedir()` + `path.join`; robust folder-create error handling.
 - **Two roots stay separate** — workspace (`~/tutoratlas`, visible) vs app-data
-  (`T3CODE_HOME`, hidden). Don't move app state into the workspace here (the roster
+  (`TUTORATLAS_HOME`, hidden). Don't move app state into the workspace here (the roster
   move is `04`).
 - Slug sanitization is shared with `04` — lowercase `[a-z0-9-]`, avoid Windows
   reserved names, bound length, prevent case-collisions.
