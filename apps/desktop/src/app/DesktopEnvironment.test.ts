@@ -40,7 +40,7 @@ describe("DesktopEnvironment", () => {
       const environment = yield* makeEnvironment(
         {},
         {
-          T3CODE_HOME: " /tmp/t3 ",
+          TUTORATLAS_HOME: " /tmp/t3 ",
           T3CODE_COMMIT_HASH: " 0123456789abcdef ",
           T3CODE_PORT: "4949",
           VITE_DEV_SERVER_URL: "http://localhost:5173",
@@ -83,7 +83,7 @@ describe("DesktopEnvironment", () => {
       const environment = yield* makeEnvironment(
         {},
         {
-          T3CODE_HOME: "/tmp/t3",
+          TUTORATLAS_HOME: "/tmp/t3",
         },
       );
 
