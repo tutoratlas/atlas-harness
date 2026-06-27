@@ -4,6 +4,7 @@ import {
   OpenPathInputSchema,
   OpenPathResultSchema,
 } from "@t3tools/contracts";
+import { sanitizeStudentSlug } from "@t3tools/shared/slugify";
 import * as Effect from "effect/Effect";
 import * as Schema from "effect/Schema";
 
@@ -21,7 +22,7 @@ export const ensureStudentWorkspace = makeIpcMethod({
 
     // Use studentId as the slug for now (until Students persistence layer is added)
     // TODO: Look up student record to get name/subjects/school for AGENTS.md template
-    const slug = input.studentId;
+    const slug = sanitizeStudentSlug(input.studentId);
 
     return yield* workspace.ensureStudentWorkspace({ slug }).pipe(
       Effect.match({
