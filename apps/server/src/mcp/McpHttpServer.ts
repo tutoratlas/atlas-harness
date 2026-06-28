@@ -13,6 +13,8 @@ import packageJson from "../../package.json" with { type: "json" };
 import * as McpInvocationContext from "./McpInvocationContext.ts";
 import * as McpSessionRegistry from "./McpSessionRegistry.ts";
 import * as PreviewAutomationBroker from "./PreviewAutomationBroker.ts";
+import * as StudentsBroadcaster from "./StudentsBroadcaster.ts";
+import * as StudentsConfirmBroker from "./StudentsConfirmBroker.ts";
 import {
   PreviewSnapshotToolkitHandlersLive,
   PreviewStandardToolkitHandlersLive,
@@ -22,6 +24,7 @@ import {
   PreviewSnapshotToolkit,
   PreviewStandardToolkit,
 } from "./toolkits/preview/tools.ts";
+import { StudentToolkitRegistrationLive } from "./toolkits/students/index.ts";
 
 const unauthorized = HttpServerResponse.jsonUnsafe(
   {
@@ -177,6 +180,7 @@ const PreviewSnapshotRegistrationLive = Layer.effectDiscard(registerPreviewSnaps
 export const PreviewToolkitRegistrationLive = Layer.mergeAll(
   PreviewStandardToolkitRegistrationLive,
   PreviewSnapshotRegistrationLive,
+  StudentToolkitRegistrationLive,
 );
 
 const McpTransportLive = McpServer.layerHttp({
@@ -188,4 +192,6 @@ const McpTransportLive = McpServer.layerHttp({
 export const layer = PreviewToolkitRegistrationLive.pipe(
   Layer.provideMerge(McpTransportLive),
   Layer.provide(PreviewAutomationBroker.layer),
+  Layer.provide(StudentsBroadcaster.layer),
+  Layer.provide(StudentsConfirmBroker.layer),
 );
