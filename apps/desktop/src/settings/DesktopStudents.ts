@@ -63,7 +63,7 @@ const StudentRegistryDocumentSchema = Schema.Struct({
 const StudentFileSchema = StudentSchema;
 const StudentFileJson = fromLenientJson(StudentFileSchema);
 const decodeStudentFileJson = Schema.decodeEffect(StudentFileJson);
-const encodeStudentFileJson = Schema.encodeEffect(StudentFileSchema);
+const encodeStudentFileJson = Schema.encodeEffect(StudentFileJson);
 
 const StudentRegistryDocumentJson = fromLenientJson(StudentRegistryDocumentSchema);
 const decodeStudentRegistryDocumentJson = Schema.decodeEffect(StudentRegistryDocumentJson);
