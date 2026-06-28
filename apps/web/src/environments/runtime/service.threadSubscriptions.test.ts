@@ -174,6 +174,9 @@ vi.mock("@t3tools/client-runtime", async (importOriginal) => {
       getProcessResourceHistory: vi.fn(),
       signalProcess: vi.fn(),
     },
+    students: {
+      subscribeStudents: vi.fn(() => () => undefined),
+    },
   };
   return {
     ...actual,

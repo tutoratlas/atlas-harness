@@ -10,6 +10,7 @@ import { ensureLocalApi } from "../localApi";
 import { StudentList } from "../components/students/StudentList";
 import { StudentDetail } from "../components/students/StudentDetail";
 import { StudentForm } from "../components/students/StudentForm";
+import { getPrimaryEnvironmentConnection } from "../environments/runtime/service";
 
 type RightPaneView = "welcome" | "detail" | "create" | "edit";
 
@@ -19,8 +20,10 @@ function StudentsContentLayout() {
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [rightPaneView, setRightPaneView] = useState<RightPaneView>("welcome");
 
-  // Load roster on mount
+  // Load roster on mount and subscribe to live updates
   useEffect(() => {
+    let unsubscribe: (() => void) | null = null;
+
     const loadStudents = async () => {
       try {
         const localApi = ensureLocalApi();
@@ -31,7 +34,39 @@ function StudentsContentLayout() {
       }
     };
 
+    // Initial load
     void loadStudents();
+
+    // Subscribe to WS updates if available
+    try {
+      const connection = getPrimaryEnvironmentConnection();
+      if (connection?.client?.students?.subscribeStudents) {
+        unsubscribe = connection.client.students.subscribeStudents(
+          async () => {
+            // On studentsChanged event, refetch the roster
+            try {
+              const localApi = ensureLocalApi();
+              const loadedStudents = await localApi.persistence.getStudents();
+              setStudents(loadedStudents);
+            } catch (error) {
+              // Silent fail - keep existing state on refetch error
+            }
+          },
+          {
+            onResubscribe: () => {
+              // On reconnect, refetch to sync state
+              void loadStudents();
+            },
+          },
+        );
+      }
+    } catch (error) {
+      // WS not available - gracefully fall back to one-shot load
+    }
+
+    return () => {
+      unsubscribe?.();
+    };
   }, []);
 
   // Persist students to storage
