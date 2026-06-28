@@ -93,3 +93,21 @@ export function deriveStudentSlug(name: string): string {
 
   return slug;
 }
+
+/**
+ * Event emitted when the student registry changes.
+ */
+export const StudentsChangedEvent = Schema.Struct({
+  tag: Schema.Literal("studentsChanged"),
+});
+export type StudentsChangedEvent = typeof StudentsChangedEvent.Type;
+
+/**
+ * Error class for MCP tool errors related to student operations.
+ */
+export class StudentToolError extends Schema.TaggedErrorClass<StudentToolError>()(
+  "StudentToolError",
+  {
+    message: Schema.String,
+  },
+) {}
