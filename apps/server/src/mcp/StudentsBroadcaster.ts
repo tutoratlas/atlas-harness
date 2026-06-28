@@ -17,11 +17,7 @@ import { ProjectionSnapshotQuery } from "../orchestration/Services/ProjectionSna
 import type { ProjectionRepositoryError } from "../persistence/Errors.ts";
 
 export interface StudentsBroadcasterShape {
-  readonly streamChanges: () => Stream.Stream<
-    StudentsChangedEvent,
-    PlatformError.PlatformError | PreviewAutomationUnavailableError | ProjectionRepositoryError,
-    McpInvocationContext.McpInvocationContext | ProjectionSnapshotQuery
-  >;
+  readonly streamChanges: (workspaceRoot?: string) => Stream.Stream<StudentsChangedEvent, never>;
 }
 
 export class StudentsBroadcaster extends Context.Service<
@@ -42,47 +38,76 @@ export const layer = Layer.effect(
       Scope.close(scope, Exit.void),
     );
 
-    const streamChanges: StudentsBroadcasterShape["streamChanges"] = () =>
-      Stream.unwrap(
-        Effect.gen(function* () {
-          // Get workspace root from MCP invocation context
-          const scope = yield* McpInvocationContext.requireMcpCapability("students");
-          const snapshotQuery = yield* ProjectionSnapshotQuery;
-          const contextOption = yield* snapshotQuery.getThreadCheckpointContext(scope.threadId);
+    const streamChanges = ((providedWorkspaceRoot) => {
+      const createStream = (workspaceRoot: string): Stream.Stream<StudentsChangedEvent, never> => {
+        const studentsDir = path.join(workspaceRoot, "students");
 
-          if (Option.isNone(contextOption)) {
-            // If no context, return empty stream
-            return Stream.empty;
-          }
+        return Stream.unwrap(
+          Effect.gen(function* () {
+            // Check if students directory exists
+            const studentsExists = yield* fs.exists(studentsDir);
+            if (!studentsExists) {
+              // If directory doesn't exist, return empty stream
+              return Stream.empty as Stream.Stream<StudentsChangedEvent, never>;
+            }
 
-          const workspaceRoot = contextOption.value.workspaceRoot;
-          const studentsDir = path.join(workspaceRoot, "students");
+            // Watch the students directory using fs.watch() + Stream.filter + Stream.debounce
+            const studentChanges = fs.watch(studentsDir).pipe(
+              Stream.filter((event) => {
+                // Filter for student.json files
+                return event.path.includes("student.json");
+              }),
+              Stream.debounce(Duration.millis(100)),
+              Stream.map(() => ({ tag: "studentsChanged" as const })),
+              Stream.tap((event) => PubSub.publish(changesPubSub, event)),
+              Stream.catch(() => Stream.empty), // Ignore file system errors
+            );
 
-          // Check if students directory exists
-          const studentsExists = yield* fs.exists(studentsDir);
-          if (!studentsExists) {
-            // If directory doesn't exist, return empty stream
-            return Stream.empty;
-          }
+            // Also subscribe to the pubsub for changes published elsewhere
+            const pubsubStream = Stream.fromPubSub(changesPubSub);
 
-          // Watch the students directory using fs.watch() + Stream.filter + Stream.debounce
-          const studentChanges = fs.watch(studentsDir).pipe(
-            Stream.filter((event) => {
-              // Filter for student.json files
-              return event.path.includes("student.json");
-            }),
-            Stream.debounce(Duration.millis(100)),
-            Stream.map(() => ({ tag: "studentsChanged" as const })),
-            Stream.tap((event) => PubSub.publish(changesPubSub, event)),
-          );
+            // Merge both streams
+            return Stream.merge(studentChanges, pubsubStream) as Stream.Stream<
+              StudentsChangedEvent,
+              never
+            >;
+          }).pipe(
+            Effect.catch((_error) =>
+              Effect.logWarning("StudentsBroadcaster error, returning empty stream").pipe(
+                Effect.as(Stream.empty as Stream.Stream<StudentsChangedEvent, never>),
+              ),
+            ),
+          ),
+        );
+      };
 
-          // Also subscribe to the pubsub for changes published elsewhere
-          const pubsubStream = Stream.fromPubSub(changesPubSub);
+      if (providedWorkspaceRoot) {
+        // Use provided workspace root (for WS subscriptions)
+        return createStream(providedWorkspaceRoot);
+      } else {
+        // Get workspace root from MCP invocation context (for MCP tool calls)
+        return Stream.unwrap(
+          Effect.gen(function* () {
+            const scope = yield* McpInvocationContext.requireMcpCapability("students");
+            const snapshotQuery = yield* ProjectionSnapshotQuery;
+            const contextOption = yield* snapshotQuery.getThreadCheckpointContext(scope.threadId);
 
-          // Merge both streams
-          return Stream.merge(studentChanges, pubsubStream);
-        }),
-      );
+            if (Option.isNone(contextOption)) {
+              // If no context, return empty stream
+              return Stream.empty as Stream.Stream<StudentsChangedEvent, never>;
+            }
+
+            return createStream(contextOption.value.workspaceRoot);
+          }).pipe(
+            Effect.catch((_error) =>
+              Effect.logWarning("StudentsBroadcaster MCP context error, returning empty stream").pipe(
+                Effect.as(Stream.empty as Stream.Stream<StudentsChangedEvent, never>),
+              ),
+            ),
+          ),
+        );
+      }
+    }) as StudentsBroadcasterShape["streamChanges"];
 
     return {
       streamChanges,

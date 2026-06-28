@@ -85,6 +85,7 @@ import { VcsStatusBroadcaster } from "./vcs/VcsStatusBroadcaster.ts";
 import { VcsProvisioningService } from "./vcs/VcsProvisioningService.ts";
 import { GitWorkflowService } from "./git/GitWorkflowService.ts";
 import { ReviewService } from "./review/ReviewService.ts";
+import { StudentsBroadcaster } from "./mcp/StudentsBroadcaster.ts";
 import { ProjectSetupScriptRunner } from "./project/Services/ProjectSetupScriptRunner.ts";
 import { RepositoryIdentityResolver } from "./project/Services/RepositoryIdentityResolver.ts";
 import { ServerEnvironment } from "./environment/Services/ServerEnvironment.ts";
@@ -206,6 +207,7 @@ const RPC_REQUIRED_SCOPE = new Map<string, AuthEnvironmentScope>([
   [WS_METHODS.subscribeServerConfig, AuthOrchestrationReadScope],
   [WS_METHODS.subscribeServerLifecycle, AuthOrchestrationReadScope],
   [WS_METHODS.subscribeAuthAccess, AuthAccessReadScope],
+  [WS_METHODS.subscribeStudents, AuthOrchestrationReadScope],
 ]);
 
 function toAuthAccessStreamEvent(
@@ -262,6 +264,7 @@ const makeWsRpcLayer = (currentSession: AuthenticatedSession) =>
       const review = yield* ReviewService;
       const vcsProvisioning = yield* VcsProvisioningService;
       const vcsStatusBroadcaster = yield* VcsStatusBroadcaster;
+      const studentsBroadcaster = yield* StudentsBroadcaster;
       const terminalManager = yield* TerminalManager;
       const previewAutomationBroker = yield* PreviewAutomationBroker.PreviewAutomationBroker;
       const previewManager = yield* PreviewManager.PreviewManager;
@@ -1620,6 +1623,14 @@ const makeWsRpcLayer = (currentSession: AuthenticatedSession) =>
               );
             }),
             { "rpc.aggregate": "auth" },
+          ),
+        [WS_METHODS.subscribeStudents]: () =>
+          observeRpcStream(
+            WS_METHODS.subscribeStudents,
+            studentsBroadcaster.streamChanges(config.cwd),
+            {
+              "rpc.aggregate": "students",
+            },
           ),
       });
     }),
