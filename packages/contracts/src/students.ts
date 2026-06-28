@@ -111,3 +111,62 @@ export class StudentToolError extends Schema.TaggedErrorClass<StudentToolError>(
     message: Schema.String,
   },
 ) {}
+
+/**
+ * Operation types for student confirmation requests.
+ */
+export const StudentConfirmOperation = Schema.Literals(["update", "delete"]);
+export type StudentConfirmOperation = typeof StudentConfirmOperation.Type;
+
+/**
+ * Student summary for confirmation dialogs.
+ */
+export const StudentSummary = Schema.Struct({
+  id: StudentId,
+  name: TrimmedNonEmptyString,
+});
+export type StudentSummary = typeof StudentSummary.Type;
+
+/**
+ * Confirmation request sent to desktop client for destructive student operations.
+ */
+export const StudentsConfirmRequest = Schema.Struct({
+  requestId: TrimmedNonEmptyString,
+  operation: StudentConfirmOperation,
+  student: StudentSummary,
+});
+export type StudentsConfirmRequest = typeof StudentsConfirmRequest.Type;
+
+/**
+ * Confirmation response from desktop client.
+ */
+export const StudentsConfirmResponse = Schema.Struct({
+  requestId: TrimmedNonEmptyString,
+  confirmed: Schema.Boolean,
+});
+export type StudentsConfirmResponse = typeof StudentsConfirmResponse.Type;
+
+/**
+ * Error class for student confirmation errors.
+ */
+export class StudentsConfirmTimeoutError extends Schema.TaggedErrorClass<StudentsConfirmTimeoutError>()(
+  "StudentsConfirmTimeoutError",
+  { message: Schema.String },
+) {}
+
+export class StudentsConfirmUnavailableError extends Schema.TaggedErrorClass<StudentsConfirmUnavailableError>()(
+  "StudentsConfirmUnavailableError",
+  { message: Schema.String },
+) {}
+
+export class StudentsConfirmRejectedError extends Schema.TaggedErrorClass<StudentsConfirmRejectedError>()(
+  "StudentsConfirmRejectedError",
+  { message: Schema.String },
+) {}
+
+export const StudentsConfirmError = Schema.Union([
+  StudentsConfirmTimeoutError,
+  StudentsConfirmUnavailableError,
+  StudentsConfirmRejectedError,
+]);
+export type StudentsConfirmError = typeof StudentsConfirmError.Type;
