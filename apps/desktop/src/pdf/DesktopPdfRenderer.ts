@@ -1,7 +1,6 @@
 import * as Context from "effect/Context";
 import * as Crypto from "effect/Crypto";
 import * as Data from "effect/Data";
-import * as Deferred from "effect/Deferred";
 import * as Effect from "effect/Effect";
 import * as FileSystem from "effect/FileSystem";
 import * as Layer from "effect/Layer";
@@ -65,37 +64,40 @@ const renderPdfWithWindow = Effect.fnUntraced(function* (input: {
   });
 
   const renderEffect = Effect.gen(function* () {
-    const didFinishLoadDeferred = yield* Deferred.make<void, DesktopPdfRendererError>();
-
     const htmlDataUri = `data:text/html;charset=utf-8,${encodeURIComponent(input.html)}`;
 
-    const finishLoadHandler = () => {
-      void Effect.runSync(Deferred.succeed(didFinishLoadDeferred, undefined));
-    };
+    const waitForLoad = Effect.callback<void, DesktopPdfRendererError>((resume) => {
+      const finishLoadHandler = () => {
+        resume(Effect.void);
+      };
 
-    const failLoadHandler = (
-      _event: Electron.Event,
-      errorCode: number,
-      errorDescription: string,
-    ) => {
-      void Effect.runSync(
-        Deferred.fail(
-          didFinishLoadDeferred,
-          new DesktopPdfRendererError({
-            cause: `Failed to load HTML: ${errorCode} ${errorDescription}`,
-          }),
-        ),
-      );
-    };
+      const failLoadHandler = (
+        _event: Electron.Event,
+        errorCode: number,
+        errorDescription: string,
+      ) => {
+        resume(
+          Effect.fail(
+            new DesktopPdfRendererError({
+              cause: `Failed to load HTML: ${errorCode} ${errorDescription}`,
+            }),
+          ),
+        );
+      };
 
-    window.webContents.once("did-finish-load", finishLoadHandler);
-    window.webContents.once("did-fail-load", failLoadHandler);
+      window.webContents.once("did-finish-load", finishLoadHandler);
+      window.webContents.once("did-fail-load", failLoadHandler);
 
-    yield* Effect.sync(() => {
       void window.loadURL(htmlDataUri);
+
+      // Detach listeners if the load is interrupted (e.g. by the timeout below).
+      return Effect.sync(() => {
+        window.webContents.removeListener("did-finish-load", finishLoadHandler);
+        window.webContents.removeListener("did-fail-load", failLoadHandler);
+      });
     });
 
-    yield* Deferred.await(didFinishLoadDeferred).pipe(
+    yield* waitForLoad.pipe(
       Effect.timeout(PDF_TIMEOUT_MS),
       Effect.catchTag("TimeoutError", () =>
         Effect.fail(
