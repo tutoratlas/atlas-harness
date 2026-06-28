@@ -12,6 +12,12 @@ T3 Code is a minimal web GUI for using coding agents like Codex and Claude.
 
 This repository is a VERY EARLY WIP. Proposing sweeping changes that improve long-term maintainability is encouraged.
 
+## Agent skills
+
+### Student manager
+
+Manage student roster via MCP tools. See `.atlas/skills/student-manager/SKILL.md`.
+
 ## Core Priorities
 
 1. Performance first.
