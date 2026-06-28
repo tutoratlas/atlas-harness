@@ -397,4 +397,81 @@ describe("Students Schema", () => {
       }),
     );
   });
+
+  describe("deriveStudentSlug", () => {
+    it("derives slug from normal name", () => {
+      const slug = Students.deriveStudentSlug("John Smith");
+      assert.equal(slug, "john-smith");
+    });
+
+    it("converts to lowercase and replaces spaces with hyphens", () => {
+      const slug = Students.deriveStudentSlug("Alice Mary Brown");
+      assert.equal(slug, "alice-mary-brown");
+    });
+
+    it("removes non-alphanumeric characters except hyphens", () => {
+      const slug = Students.deriveStudentSlug("O'Connor (Special)");
+      assert.equal(slug, "oconnor-special");
+    });
+
+    it("collapses multiple hyphens into one", () => {
+      const slug = Students.deriveStudentSlug("John   --  Smith");
+      assert.equal(slug, "john-smith");
+    });
+
+    it("trims leading and trailing hyphens", () => {
+      const slug = Students.deriveStudentSlug("  -John Smith-  ");
+      assert.equal(slug, "john-smith");
+    });
+
+    it("prefixes Windows reserved name CON with underscore", () => {
+      const slug = Students.deriveStudentSlug("CON");
+      assert.equal(slug, "_con");
+    });
+
+    it("prefixes Windows reserved name PRN with underscore", () => {
+      const slug = Students.deriveStudentSlug("PRN");
+      assert.equal(slug, "_prn");
+    });
+
+    it("prefixes Windows reserved name AUX with underscore", () => {
+      const slug = Students.deriveStudentSlug("AUX");
+      assert.equal(slug, "_aux");
+    });
+
+    it("prefixes Windows reserved name NUL with underscore", () => {
+      const slug = Students.deriveStudentSlug("NUL");
+      assert.equal(slug, "_nul");
+    });
+
+    it("prefixes Windows reserved name COM1 with underscore", () => {
+      const slug = Students.deriveStudentSlug("COM1");
+      assert.equal(slug, "_com1");
+    });
+
+    it("prefixes Windows reserved name COM9 with underscore", () => {
+      const slug = Students.deriveStudentSlug("com9");
+      assert.equal(slug, "_com9");
+    });
+
+    it("prefixes Windows reserved name LPT1 with underscore", () => {
+      const slug = Students.deriveStudentSlug("LPT1");
+      assert.equal(slug, "_lpt1");
+    });
+
+    it("prefixes Windows reserved name LPT9 with underscore", () => {
+      const slug = Students.deriveStudentSlug("lpt9");
+      assert.equal(slug, "_lpt9");
+    });
+
+    it("does not prefix non-reserved names that contain reserved words", () => {
+      const slug = Students.deriveStudentSlug("Connor Smith");
+      assert.equal(slug, "connor-smith");
+    });
+
+    it("does not prefix names with reserved word as substring", () => {
+      const slug = Students.deriveStudentSlug("Auxiliary");
+      assert.equal(slug, "auxiliary");
+    });
+  });
 });

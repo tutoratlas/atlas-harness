@@ -64,15 +64,32 @@ export const StudentRegistryDocument = Schema.Struct({
 export type StudentRegistryDocument = typeof StudentRegistryDocument.Type;
 
 /**
+ * Windows reserved names that cannot be used as filenames.
+ * These need to be prefixed with '_' to avoid filesystem conflicts.
+ */
+const WINDOWS_RESERVED_NAMES = new Set([
+  "con", "prn", "aux", "nul",
+  "com1", "com2", "com3", "com4", "com5", "com6", "com7", "com8", "com9",
+  "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9",
+]);
+
+/**
  * Derives a URL-safe slug from a student name (lowercase, hyphenated).
  * Plan 23 pairs this with a short id suffix to guarantee folder uniqueness.
  */
 export function deriveStudentSlug(name: string): string {
-  return name
+  let slug = name
     .trim()
     .toLowerCase()
     .replace(/\s+/g, "-")
     .replace(/[^a-z0-9-]/g, "")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
+
+  // Prefix Windows reserved names with '_' to avoid filesystem conflicts
+  if (WINDOWS_RESERVED_NAMES.has(slug)) {
+    slug = `_${slug}`;
+  }
+
+  return slug;
 }
